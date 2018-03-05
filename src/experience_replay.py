@@ -21,4 +21,10 @@ class ExperienceReplay:
 
     # Sample batch_size elements from the storage:
     def sample(self, batch_size):
-        return random.sample(self.storage, min(batch_size, len(self.storage)))
+        minibatch_sample = random.sample(self.storage, min(batch_size, len(self.storage)))
+        minibatch_state      = np.array([s[0] for s in minibatch_sample])
+        minibatch_action     = np.array([s[1] for s in minibatch_sample])
+        minibatch_reward     = np.array([s[2] for s in minibatch_sample])
+        minibatch_next_state = np.array([s[3] for s in minibatch_sample])
+        minibatch_done       = np.array([s[4] for s in minibatch_sample])
+        return minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done
