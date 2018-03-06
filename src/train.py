@@ -17,12 +17,14 @@ replay_start_size = 50000
 
 # Checkpoints:
 checkpoint = None
+first_episode = 0
+first_timestep = 0
 checkpoint_folder = "../tmp/"
-checkpoint_t = 2500
+checkpoint_t = 1000
 
 # Performances are saved on a file:
-performances_file = open(checkpoint_folder + "performances.txt", "w")
-performances_file.write("episode\ttimestep\treward_per_episode\n")
+performances = []
+performances_file_description = "episode\ttimestep\treward_per_episode"
 
 # Set up gym environment:
 env = gym.make("Pong-v0")
@@ -33,7 +35,8 @@ state_shape[2] = history_length
 dqn = dqn.DQN(batch_size, state_shape, env.action_space.n)
 experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
 
-timestep = 0
+# Set up timestep and epsilon (used in epsilon-greedy strategy):
+timestep = first_timestep
 epsilon = 1.0
 
 with tf.Session() as sess:
@@ -45,7 +48,7 @@ with tf.Session() as sess:
         tf_saver.restore(sess, checkpoint_folder + checkpoint)
 
     # Train the network for episodes episodes:
-    for episode in range(episodes):
+    for episode in range(first_episode, episodes):
         observation = env.reset()
         phi_observation = np.concatenate([np.zeros([state_shape[0], state_shape[1], state_shape[2]-1]), utils.pong_preprocess(observation)], axis=2)
         done = False
@@ -87,12 +90,13 @@ with tf.Session() as sess:
                 loss = dqn.train_batch(minibatch_state, q_targets, action_targets, sess)
 
         # Print performances per episode:
-        print("episode=" + str(episode) + ", timestep=" + str(timestep) + ", reward_per_episode=" + str(reward_per_episode))
-        performances_file.write(str(episode) + "\t" + str(timestep) + "\t" + str(reward_per_episode) + "\n")
+        print("episode=" + str(episode+1) + ", timestep=" + str(timestep) + ", reward_per_episode=" + str(reward_per_episode))
+        performances.append([str(episode+1), str(timestep), str(reward_per_episode)])
 
-        # Save checkpoint:
+        # Save checkpoint and performances:
         if (episode + 1) % checkpoint_t == 0:
             tf_saver.save(sess, checkpoint_folder + "model_" + str(episode+1) + ".ckpt")
+            utils.save_performances(checkpoint_folder + "performances_" + str(episode+1) + ".txt", performances, performances_file_description)
 
-# Close performances file:
-performances_file.close()
+# Save performances on a file:
+utils.save_performances(checkpoint_folder + "performances.txt", performances, performances_file_description)
