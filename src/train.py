@@ -7,12 +7,14 @@ import dqn
 import experience_replay
 import utils
 
+import atari_wrappers
+
 # Extended Data Table 1 | List of hyperparameters and their values:
 # (taken from "Human-level control through deep reinforcement learning", Mnih et al.)
 episodes = 10000 # note that the paper does not consider episodes but frames
 batch_size = 32
 replay_memory_size = 100000 # in the paper it's 1M
-history_length = 4
+#history_length = 4 # already managed by atari_wrappers
 gamma = 0.99
 rmsprop_learning_rate = 0.00025
 rmsprop_momentum = 0.95
@@ -36,10 +38,13 @@ performances_file_description = "episode\ttimestep\treward_per_episode"
 
 # Set up gym environment:
 env = gym.make("Pong-v0")
+env = atari_wrappers.wrap_deepmind(env, frame_stack=True)
 
 # Set up dqn and experienceReplay:
-state_shape = list(utils.pong_state_shape())
-state_shape[2] = history_length
+#state_shape = list(utils.pong_state_shape())
+#state_shape[2] = history_length
+#dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon))
+state_shape = [84, 84, 4]
 dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon))
 experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
 #if experience_replay_filename:
@@ -62,8 +67,9 @@ with tf.Session() as sess:
 
     # Train the network for episodes episodes:
     for episode in range(first_episode, episodes):
-        observation = env.reset()
-        phi_observation = np.concatenate([np.zeros([state_shape[0], state_shape[1], state_shape[2]-1]), utils.pong_preprocess(observation)], axis=2)
+        #observation = env.reset()
+        #phi_observation = np.concatenate([np.zeros([state_shape[0], state_shape[1], state_shape[2]-1]), utils.pong_preprocess(observation)], axis=2)
+        phi_observation = env.reset()
         done = False
 
         # Performances per episode:
@@ -85,11 +91,12 @@ with tf.Session() as sess:
                 epsilon = -0.9 * 1e-6 * timestep + 1
 
             # Perform the chosen action in the environment:
-            next_observation, reward, done, info = env.step(action)
+            #next_observation, reward, done, info = env.step(action)
+            phi_next_observation, reward, done, info = env.step(action)
             reward_per_episode = reward_per_episode + reward
 
             # Store transition (phi_t, a_t, r_t, phi_t+1, done) in experienceReplay:
-            phi_next_observation = np.concatenate([phi_observation[:,:,1:], utils.pong_preprocess(next_observation)], axis=2)
+            #phi_next_observation = np.concatenate([phi_observation[:,:,1:], utils.pong_preprocess(next_observation)], axis=2)
             experienceReplay.add(phi_observation, action, reward, phi_next_observation, done)
             phi_observation = phi_next_observation
 
