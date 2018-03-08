@@ -8,7 +8,7 @@ class DQN:
                  batch_size,
                  state_shape,
                  num_actions,
-                 optimizer=tf.train.RMSPropOptimizer(learning_rate=0.00025, momentum=0.95, epsilon=0.01)):
+                 optimizer):
         self.batch_size  = batch_size
         self.state_shape = state_shape
         self.num_actions = num_actions
