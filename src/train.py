@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+#import pickle
 import gym
 
 import dqn
@@ -10,17 +11,24 @@ import utils
 # (taken from "Human-level control through deep reinforcement learning", Mnih et al.)
 episodes = 10000 # note that the paper does not consider episodes but frames
 batch_size = 32
-replay_memory_size = 1000000
+replay_memory_size = 100000 # in the paper it's 1M
 history_length = 4
 gamma = 0.99
-replay_start_size = 50000
+rmsprop_learning_rate = 0.00025
+rmsprop_momentum = 0.95
+rmsprop_epsilon = 0.01
+replay_start_size = 10000 # in the paper it's 50K
 
 # Checkpoints:
 checkpoint = None
 first_episode = 0
 first_timestep = 0
 checkpoint_folder = "../tmp/"
-checkpoint_t = 1000
+checkpoint_t = 500
+# NOTE: experienceReplay is not going to be saved because Pickle does not
+# support big files and because experienceReplay easily reaches high dimensions.
+# Possible fix at https://stackoverflow.com/questions/31468117/python-3-can-pickle-handle-byte-objects-larger-than-4gb.
+#experience_replay_filename = None
 
 # Performances are saved on a file:
 performances = []
@@ -32,8 +40,13 @@ env = gym.make("Pong-v0")
 # Set up dqn and experienceReplay:
 state_shape = list(utils.pong_state_shape())
 state_shape[2] = history_length
-dqn = dqn.DQN(batch_size, state_shape, env.action_space.n)
+dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon))
 experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
+#if experience_replay_filename:
+#    with open(checkpoint_folder + experience_replay_filename, "rb") as experience_replay_file:
+#        experienceReplay = pickle.load(experience_replay_file)
+#else:
+#    experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
 
 # Set up timestep and epsilon (used in epsilon-greedy strategy):
 timestep = first_timestep
@@ -43,7 +56,7 @@ with tf.Session() as sess:
     tf.global_variables_initializer().run()
     tf_saver = tf.train.Saver()
 
-    # Restore checkpoint if specified:
+    # Restore TensorFlow checkpoint if specified:
     if checkpoint:
         tf_saver.restore(sess, checkpoint_folder + checkpoint)
 
@@ -96,6 +109,8 @@ with tf.Session() as sess:
         # Save checkpoint and performances:
         if (episode + 1) % checkpoint_t == 0:
             tf_saver.save(sess, checkpoint_folder + "model_" + str(episode+1) + ".ckpt")
+            #with open(checkpoint_folder + "experience_replay_" + str(episode+1) + ".pkl", "wb") as experience_replay_file:
+            #    pickle.dump(experienceReplay, experience_replay_file, pickle.HIGHEST_PROTOCOL)
             utils.save_performances(checkpoint_folder + "performances_" + str(episode+1) + ".txt", performances, performances_file_description)
 
 # Save performances on a file:
