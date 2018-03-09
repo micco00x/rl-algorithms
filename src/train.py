@@ -19,6 +19,9 @@ gamma = 0.99
 rmsprop_learning_rate = 0.00025
 rmsprop_momentum = 0.95
 rmsprop_epsilon = 0.01
+initial_exploration = 1.0
+final_exploration = 0.1
+final_exploration_frame = 1000000
 replay_start_size = 10000 # in the paper it's 50K
 
 # Checkpoints:
@@ -55,7 +58,9 @@ experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
 
 # Set up timestep and epsilon (used in epsilon-greedy strategy):
 timestep = first_timestep
-epsilon = 1.0
+epsilon = initial_exploration
+eps_greedy_strategy_q = initial_exploration
+eps_greedy_strategy_m = (final_exploration - eps_greedy_strategy_q) / final_exploration_frame
 
 with tf.Session() as sess:
     tf.global_variables_initializer().run()
@@ -87,8 +92,8 @@ with tf.Session() as sess:
 
             # Linearly reduce epsilon for the first million timesteps:
             if timestep <= 1e6:
-                timestep = timestep + 1
-                epsilon = -0.9 * 1e-6 * timestep + 1
+                epsilon = eps_greedy_strategy_m * timestep + eps_greedy_strategy_q
+            timestep = timestep + 1
 
             # Perform the chosen action in the environment:
             #next_observation, reward, done, info = env.step(action)
