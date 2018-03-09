@@ -19,9 +19,12 @@ gamma = 0.99
 rmsprop_learning_rate = 0.00025
 rmsprop_momentum = 0.95
 rmsprop_epsilon = 0.01
+# using Adam instead of RMSProp as in https://medium.com/mlreview/speeding-up-dqn-on-pytorch-solving-pong-in-30-minutes-81a1bd2dff55:
+#optimizer = tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon)
+optimizer = tf.train.AdamOptimizer(learning_rate=1e-4)
 initial_exploration = 1.0
-final_exploration = 0.1
-final_exploration_frame = 1000000
+final_exploration = 0.02 # in the paper it's 0.1
+final_exploration_frame = 100000 # in the paper it's 1000000
 replay_start_size = 10000 # in the paper it's 50K
 
 # Checkpoints:
@@ -48,7 +51,7 @@ env = atari_wrappers.wrap_deepmind(env, frame_stack=True)
 #state_shape[2] = history_length
 #dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon))
 state_shape = [84, 84, 4]
-dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, tf.train.RMSPropOptimizer(learning_rate=rmsprop_learning_rate, momentum=rmsprop_momentum, epsilon=rmsprop_epsilon))
+dqn = dqn.DQN(batch_size, state_shape, env.action_space.n, optimizer)
 experienceReplay = experience_replay.ExperienceReplay(replay_memory_size)
 #if experience_replay_filename:
 #    with open(checkpoint_folder + experience_replay_filename, "rb") as experience_replay_file:
