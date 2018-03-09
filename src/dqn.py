@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 # Class that implements the Deep-Q network described in
 # "Playing Atari with Deep Reinforcement Learning" by Mnih et al.
@@ -29,7 +30,6 @@ class DQN:
             scope.reuse_variables()
             q_next_outputs = self._policy(self.next_x_batch)
 
-        #self.q_targets = tf.placeholder(tf.float32, shape=[self.batch_size])
         self.action_targets = tf.placeholder(tf.int32, shape=[self.batch_size])
         self.rewards = tf.placeholder(tf.float32, shape=[self.batch_size])
         self.done_mask = tf.placeholder(tf.float32, shape=[self.batch_size])
@@ -37,8 +37,6 @@ class DQN:
 
         # Loss function (see paper eq. 2), L_i(theta_i) = E((y_i - Q(s, a; theta_i))^2):
         action_mask = tf.one_hot(self.action_targets, self.num_actions)
-        #diff = self.q_targets - tf.reduce_sum(self.q_outputs * action_mask, axis=1)
-        #self.loss = tf.reduce_mean(tf.square(diff))
         diff = y_j - tf.reduce_sum(tf.multiply(action_mask, self.q_outputs), axis=1)
         self.loss = tf.reduce_mean(tf.square(diff))
 
@@ -62,15 +60,6 @@ class DQN:
     def predict(self, x, sess):
         return sess.run(self.q_single, feed_dict={self.x_single: x})
 
-    # Returns Q(x_batch, a; theta) for each action a:
-#    def predict_batch(self, x_batch, sess):
-#        return sess.run(self.q_outputs, feed_dict={self.x_batch: x_batch})
-
-    # Train the network on a single batch and return the loss:
-    #def train_batch(self, x_batch, q_targets, action_targets, sess):
-    #    loss, _ = sess.run([self.loss, self.train_step], feed_dict={self.x_batch: x_batch, self.q_targets: q_targets, self.action_targets: action_targets})
-    #    return loss
-
     def train_batch(self, minibatch_sample, sess):
         (minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done) = minibatch_sample
         loss, _ = sess.run([self.loss, self.train_step],
@@ -78,5 +67,5 @@ class DQN:
                                       self.action_targets: minibatch_action,
                                       self.rewards: minibatch_reward,
                                       self.next_x_batch: minibatch_next_state,
-                                      self.done_mask: minibatch_done
+                                      self.done_mask: np.logical_not(minibatch_done)
                                       })
