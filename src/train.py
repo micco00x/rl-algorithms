@@ -112,10 +112,11 @@ with tf.Session() as sess:
             # perform a gradient descent step on the loss function:
             if timestep >= replay_start_size:
                 minibatch_sample = experienceReplay.sample(batch_size)
-                (minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done) = minibatch_sample
-                q_targets = minibatch_reward + gamma * np.multiply([0 if d == True else 1 for d in minibatch_done], np.amax(dqn.predict_batch(minibatch_next_state, sess), axis=1))
-                action_targets = minibatch_action
-                loss = dqn.train_batch(minibatch_state, q_targets, action_targets, sess)
+                #(minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done) = minibatch_sample
+                #q_targets = minibatch_reward + gamma * np.multiply([0 if d == True else 1 for d in minibatch_done], np.amax(dqn.predict_batch(minibatch_next_state, sess), axis=1))
+                #action_targets = minibatch_action
+                #loss = dqn.train_batch(minibatch_state, q_targets, action_targets, sess)
+                loss = dqn.train_batch(minibatch_sample, sess)
 
         # Print performances per episode:
         print("episode=" + str(episode+1) + ", timestep=" + str(timestep) + ", reward_per_episode=" + str(reward_per_episode))
