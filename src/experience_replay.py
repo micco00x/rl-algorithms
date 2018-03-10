@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 # Class for the experience replay used to train the DQN:
 class ExperienceReplay:
@@ -21,10 +20,15 @@ class ExperienceReplay:
 
     # Sample batch_size elements from the storage:
     def sample(self, batch_size):
-        minibatch_sample = random.sample(self.storage, min(batch_size, len(self.storage)))
-        minibatch_state      = np.array([s[0] for s in minibatch_sample])
-        minibatch_action     = np.array([s[1] for s in minibatch_sample])
-        minibatch_reward     = np.array([s[2] for s in minibatch_sample])
-        minibatch_next_state = np.array([s[3] for s in minibatch_sample])
-        minibatch_done       = np.array([s[4] for s in minibatch_sample])
+        minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done = [], [], [], [], []
+        idxs = np.random.randint(len(self.storage), size=min(batch_size, len(self.storage)))
+        for idx in idxs:
+            data = self.storage[idx]
+            (state, action, reward, next_state, done) = data
+            minibatch_state.append(np.array(state, copy=False))
+            minibatch_action.append(np.array(action, copy=False))
+            minibatch_reward.append(np.array(reward, copy=False))
+            minibatch_next_state.append(np.array(next_state, copy=False))
+            minibatch_done.append(np.array(done, copy=False))
+
         return minibatch_state, minibatch_action, minibatch_reward, minibatch_next_state, minibatch_done
