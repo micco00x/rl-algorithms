@@ -12,8 +12,9 @@ import atari_wrappers
 # Extended Data Table 1 | List of hyperparameters and their values:
 # (taken from "Human-level control through deep reinforcement learning", Mnih et al.)
 episodes = 10000 # note that the paper does not consider episodes but frames
-batch_size = 32
 replay_memory_size = 100000 # in the paper it's 1M
+batch_size = 32
+target_network_update_frequency = 1000 # parameter C, in the paper it's 10000
 gamma = 0.99
 # using Adam instead of RMSProp as in https://medium.com/mlreview/speeding-up-dqn-on-pytorch-solving-pong-in-30-minutes-81a1bd2dff55:
 #rmsprop_learning_rate = 0.00025
@@ -105,6 +106,10 @@ with tf.Session() as sess:
             if timestep >= replay_start_size:
                 minibatch_sample = experienceReplay.sample(batch_size)
                 loss = dqn.train_batch(minibatch_sample, sess)
+
+            # Every C step reset Q-hat to Q:
+            if timestep % target_network_update_frequency == 0:
+                dqn.update_target_policy(sess)
 
         # Print performances per episode:
         print("episode=" + str(episode+1) + ", timestep=" + str(timestep) + ", reward_per_episode=" + str(reward_per_episode))
