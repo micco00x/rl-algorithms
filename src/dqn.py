@@ -50,15 +50,17 @@ class DQN:
         # Training step (minimize the loss function):
         self.train_step = optimizer.minimize(self.loss)
 
+    # Define model architecture as described in the paper:
     def _policy(self, x):
         # Values to [-1, 1]:
         x = x / 127.5 - 1
 
-        # Conv + Relu + Conv + Relu + FF + FF:
-        conv1 = tf.layers.conv2d(x, filters=16, kernel_size=(8, 8), strides=(4, 4), activation=tf.nn.relu, name="conv1")
-        conv2 = tf.layers.conv2d(conv1, filters=32, kernel_size=(4, 4), strides=(2, 2), activation=tf.nn.relu, name="conv2")
-        conv2 = tf.contrib.layers.flatten(conv2)
-        ff1 = tf.layers.dense(conv2, units=512, activation=tf.nn.relu, name="ff1")
+        # Conv + Relu + Conv + Relu + Conv + Relu + FF + FF:
+        conv1 = tf.layers.conv2d(x, filters=32, kernel_size=(8, 8), strides=(4, 4), activation=tf.nn.relu, name="conv1")
+        conv2 = tf.layers.conv2d(conv1, filters=64, kernel_size=(4, 4), strides=(2, 2), activation=tf.nn.relu, name="conv2")
+        conv3 = tf.layers.conv2d(conv2, filters=64, kernel_size=(3, 3), strides=(1, 1), activation=tf.nn.relu, name="conv3")
+        conv3 = tf.contrib.layers.flatten(conv3)
+        ff1 = tf.layers.dense(conv3, units=512, activation=tf.nn.relu, name="ff1")
         ff2 = tf.layers.dense(ff1, units=self.num_actions, name="ff2")
 
         return ff2
