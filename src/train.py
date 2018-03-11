@@ -43,7 +43,8 @@ performances = []
 performances_file_description = "episode\ttimestep\treward_per_episode"
 
 # Set up gym environment:
-env = gym.make("Pong-v0")
+env = gym.make("PongNoFrameskip-v0")
+env = atari_wrappers.MaxAndSkipEnv(env) # speed up training by repeating the same action for 4 frames
 env = atari_wrappers.wrap_deepmind(env, frame_stack=True)
 
 # Set up dqn and experienceReplay:
