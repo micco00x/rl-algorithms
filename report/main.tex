@@ -129,7 +129,7 @@ In the last years, reinforcement learning has seen an increasing interest thanks
 in particular, to GPUs and the diffusion of deep learning. The aim of this
 project is to study the Deep-Q Learning with Experience Replay
 algorithm, introduced in \cite{mnih2013playing}, and train
-the Deep-Q Network on the game of Pong, using OpenAI Gym environments\cite{openai-gym}.
+a Deep-Q Network on the game of Pong, using OpenAI Gym environments\cite{openai-gym}.
 
 In particular, different experiments have been performed comparing the algorithm
 of \cite{mnih2013playing} and its successor, introduced in the famous Nature
@@ -156,13 +156,13 @@ the agent can interact. In particular, at each timestep, the agent performs an
 action receiving an observation, a reward and a boolean value telling whether the
 observation is final with respect to the episode or not.
 
-Part of this environments are classic Atari games and make use Arcade Learning
+Part of this environments are classic Atari games and make use of Arcade Learning
 Environment. This project makes use of two similar Pong environments,
 \texttt{Pong-v0} and \texttt{PongNoFrameskip-v0}. Both returns as observation
 an RGB image of shape $(210, 160, 3)$. The difference is within the number of times
 the action is repeated: while in \texttt{Pong-v0} each action is repeatedly
 performed for a duration of $k$ frames, where $k$ is uniformely sampled from
-$\{ 2, 3, 4 \}$, in \texttt{PongNoFrameskip-v0} each action is performed for
+$\{ 2, 3, 4 \}$, in \texttt{PongNoFrameskip-v0} each action is performed only for
 a single frame.
 
 Another interesting tool used in this project are OpenAI Atari
@@ -204,14 +204,14 @@ can also be defined by using the \textit{Bellman optimality equation}:
 	Q^*(s, a) = \mathbb{E}_{s' \sim \mathcal{E}} \left[ r + \gamma \max_{a'} Q^*(s', a') \middle| s, a \right]
 \end{equation*}
 
-\noindent it's possible to estimate it by using an iterative update:
+\noindent it is possible to estimate it by using an iterative update:
 \begin{equation*}
 	Q_{i+1}(s, a) = \mathbb{E}_{s' \sim \mathcal{E}} \left[ r + \gamma \max_{a'} Q_{i}(s', a') \middle| s, a \right]
 \end{equation*}
 
 \noindent converging to the optimal action-value function $Q_i \rightarrow Q^*$
 as $i \rightarrow \infty$. Of course, when the state space is too big, like
-in the case of Pong, it's impossible to store all the values in a single table.
+in the case of Pong, it is impossible to store all the values in a single table.
 Moreover, the iterative update would take too much time to converge since no
 generalization is done on the problem. This problem can be easily handled by
 approximating the Q function with a function $Q(s, a; \theta) \approx Q^*(s, a)$
@@ -264,9 +264,9 @@ At this point a minibatch of transitions is sampled from $\mathcal{D}$ and it is
 used to performed a gradient descent step on the loss function (lines 11-13).
 Note that the target $y_j$ changes depending on the last observed
 frame\footnote{The experience replay implementation also stores the boolean
-\texttt{done}\ which denotes the end of the episode.} (if it's final or not).
-To have a comparison with a fast convergence implementation (see \cite{Medium-Pong-30min})
-the optimization algorithm used has been Adam (with learning rate $\eta = 0.0001$),
+\texttt{done}\ which denotes the end of the episode.} (if it is final or not).
+To have a comparison with a fast convergence implementation (see \cite{Medium-Pong-30min}),
+the optimization algorithm used has been Adam (with learning rate $\eta = 0.0001$)
 instead of RMSProp as originally proposed in the paper, which has faster
 convergence properties w.r.t RMSProp\cite{Adam-Kingma} even if it is less stable
 in this scenario. The training has been started after 10,000 observations.
@@ -356,8 +356,8 @@ loss.
 The network has been trained on the environment \texttt{Pong-v0} for 1,000 episodes (around 3.6M frames) using a
 batchsize of 32 elements and a discount factor $\gamma = 0.99$ reaching
 an average reward per episode (computed over 25 episodes) of $0.2$ as it is
-possible to see from figure \ref{fig:experiments}. The Huber loss function used
-a value of $\delta = 1$. Algorithm
+possible to see from figure \ref{fig:experiments}. The Huber loss function
+has been used with $\delta = 1$. Algorithm
 \ref{algorithm:deep-q-learning-15} slightly improves algorithm
 \ref{algorithm:deep-q-learning-13} performing much better in particular in the
 initial phase, where the agent explores the environment more frequently.
