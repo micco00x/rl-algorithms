@@ -18,7 +18,7 @@ state_shape = [84, 84, 4]
 dqn = dqn.DQN(32, state_shape, env.action_space.n, tf.train.AdamOptimizer(learning_rate=1e-4))
 
 # Checkpoints:
-checkpoint = "../tmp/model_500.ckpt"
+checkpoint = "../tmp/model_1500.ckpt"
 
 #tf.reset_default_graph()
 
